@@ -348,6 +348,39 @@ router.get('/subscriptions/:listId', (req, res) => {
     });
 });
 
+router.get('/subscriptions-by-email/:email', (req, res) => {
+    const email = req.params.email;
+
+    lists.list(null, null, function(err, allLists) {
+        if (err) {
+            res.status(500);
+            res.json({
+                error: err.message || err,
+            });
+            return;
+        }
+
+        const matchedSubscriptions = [];
+        let resolved = 0;
+        for (let i = 0; i < allLists.length; i++) {
+            subscriptions.getByEmail(allLists[i].id, email, function(err, result) {
+                if (result) {
+                    matchedSubscriptions.push(result);
+                }
+                resolved++;
+                if (resolved === allLists.length) {
+                    res.status(200);
+                    res.json({
+                        total: matchedSubscriptions.length,
+                        subscriptions: matchedSubscriptions,
+                        email: email,
+                    });
+                }
+            })
+        }
+    });
+});
+
 router.post('/field/:listId', (req, res) => {
     let input = {};
     Object.keys(req.body).forEach(key => {
