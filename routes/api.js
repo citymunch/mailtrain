@@ -510,4 +510,34 @@ router.get('/blacklist/get', (req, res) => {
     });
 });
 
+router.post('/lists/add', (req, res) => {
+    console.log('req.body', req.body);
+
+    lists.create(req.body, (err, id) => {
+        console.log('created', err, id);
+
+        if (err || !id) {
+            res.status(500);
+            res.json({
+                error: err.message || err,
+            });
+            return;
+        }
+
+        lists.get(id, (err, list) => {
+            if (err) {
+                res.status(500);
+                res.json({
+                    error: err.message || err,
+                });
+                return;
+            }
+
+            res.status(200);
+            res.json({list});
+            return;
+        });
+    });
+});
+
 module.exports = router;
